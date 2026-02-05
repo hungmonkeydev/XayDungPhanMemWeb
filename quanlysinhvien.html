@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Sinh Viên - CRUD với REST API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+
+        .form-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        .form-group input {
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+        }
+
+        .table-container {
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tbody tr {
+            transition: all 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+            transform: scale(1.01);
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(3, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .action-buttons button {
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Quản Lý Sinh Viên (Nhóm 19)</h1>
+            <p>Hệ thống CRUD với REST API - MockAPI.io</p>
+        </div>
+
+        <div class="content">
+            <div id="messageArea"></div>
+
+            <!-- Form thêm/sửa sinh viên ddd-->
+            <div class="form-section">
+                <h2 id="formTitle">Thêm Sinh Viên Mới</h2>
+                <form id="studentForm">
+                    <input type="hidden" id="studentId">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">Họ và Tên *</label>
+                            <input type="text" id="name" required placeholder="Nhập họ tên sinh viên">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Số Điện Thoại *</label>
+                            <input type="tel" id="phone" required placeholder="0123456789">
+                        </div>
+                        <div class="form-group">
+                            <label for="avatar">Avatar URL</label>
+                            <input type="url" id="avatar" placeholder="https://example.com/avatar.jpg">
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button type="submit" class="btn-primary" id="submitBtn">
+                            Thêm Sinh Viên
+                        </button>
+                        <button type="button" class="btn-secondary" id="cancelBtn" style="display: none;">
+                            Hủy
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Thống kê -->
+            <div class="stats">
+                <div class="stat-card">
+                    <h3 id="totalStudents">0</h3>
+                    <p>Tổng Sinh Viên</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="displayedStudents">0</h3>
+                    <p>Đang Hiển Thị</p>
+                </div>
+            </div>
+
+            <!-- Tìm kiếm -->
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên hoặc số điện thoại...">
+                <button class="btn-primary" onclick="loadStudents()">🔄 Làm mới</button>
+            </div>
+
+            <!-- Bảng danh sách sinh viên -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Avatar</th>
+                            <th>Họ và Tên</th>
+                            <th>Số Điện Thoại</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody">
+                        <tr>
+                            <td colspan="5" class="loading">Đang tải dữ liệu</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ QUAN TRỌNG: Thay đổi API_URL này bằng URL từ mockapi.io của bạn
+        const API_URL = 'https://69844dae885008c00db0ab23.mockapi.io/api/sinhvien';
+        
+        // Biến lưu trữ dữ liệu
+        let students = [];
+        let editingId = null;
+
+        // Khởi tạo khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStudents();
+            setupEventListeners();
+        });
+
+        // Thiết lập các event listeners
+        function setupEventListeners() {
+            document.getElementById('studentForm').addEventListener('submit', handleSubmit);
+            document.getElementById('cancelBtn').addEventListener('click', cancelEdit);
+            document.getElementById('searchInput').addEventListener('input', handleSearch);
+        }
+
+        // Hiển thị loading overlay
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // Hiển thị thông báo
+        function showMessage(message, type = 'success') {
+            const messageArea = document.getElementById('messageArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = message;
+            messageArea.appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+
+        // READ - Lấy danh sách sinh viên
+        async function loadStudents() {
+            showLoading();
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Không thể tải dữ liệu');
+                
+                students = await response.json();
+                displayStudents(students);
+                updateStats();
+                showMessage('Tải dữ liệu thành công!', 'success');
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Lỗi: ' + error.message, 'error');
+                document.getElementById('studentTableBody').innerHTML = 
+                    '<tr><td colspan="5" style="text-align: center; color: red;">Không thể tải dữ liệu. Vui lòng kiểm tra API_URL!</td></tr>';
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Hiển thị danh sách sinh viên
+        function displayStudents(data) {
+            const tbody = document.getElementById('studentTableBody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Không có dữ liệu</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(student => `
+                <tr>
+                    <td>${student.id}</td>
+                    <td>
+                        <img src="${student.avatar || 'https://via.placeholder.com/50'}" 
+                             alt="${student.name}" 
+                             class="avatar"
+                             onerror="this.src='https://via.placeholder.com/50'">
+                    </td>
+                    <td>${student.name}</td>
+                    <td>${student.phone}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-warning" onclick="editStudent('${student.id}')">
+                                ✏️ Sửa
+                            </button>
+                            <button class="btn-danger" onclick="deleteStudent('${student.id}', '${student.name}')">
+                                🗑️ Xóa
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            updateStats();
+        }
+
+        // CREATE/UPDATE - Xử lý submit form
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            const studentData = {
+                name: document.getElementById('name').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                avatar: document.getElementById('avatar').value.trim() || 'https://via.placeholder.com/50'
+            };
+
+            showLoading();
+            try {
+                let response;
+                if (editingId) {
+                    // UPDATE
+                    response = await fetch(`${API_URL}/${editingId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(studentData)
+                    });
+                    showMessage('Cập nhật sinh viên thành công!', 'success');
+                } else {
+                    // CREATE
+                    response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(studentData)
+                    });
+                    showMessage('Thêm sinh viên thành công!', 'success');
+                }
+
+                if (!response.ok) throw new Error('Có lỗi xảy ra');
+
+                resetForm();
+                loadStudents();
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Lỗi: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // READ ONE - Lấy thông tin sinh viên để chỉnh sửa
+        async function editStudent(id) {
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}/${id}`);
+                if (!response.ok) throw new Error('Không thể lấy thông tin sinh viên');
+                
+                const student = await response.json();
+                
+                document.getElementById('studentId').value = student.id;
+                document.getElementById('name').value = student.name;
+                document.getElementById('phone').value = student.phone;
+                document.getElementById('avatar').value = student.avatar;
+                
+                editingId = id;
+                document.getElementById('formTitle').textContent = '✏️ Chỉnh Sửa Sinh Viên';
+                document.getElementById('submitBtn').innerHTML = '💾 Cập Nhật';
+                document.getElementById('cancelBtn').style.display = 'inline-flex';
+                
+                // Scroll to form
+                document.getElementById('studentForm').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Lỗi: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // DELETE - Xóa sinh viên
+        async function deleteStudent(id, name) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa sinh viên "${name}"?`)) {
+                return;
+            }
+
+            showLoading();
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) throw new Error('Không thể xóa sinh viên');
+
+                showMessage(`Đã xóa sinh viên "${name}" thành công!`, 'success');
+                loadStudents();
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Lỗi: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('studentForm').reset();
+            document.getElementById('studentId').value = '';
+            editingId = null;
+            document.getElementById('formTitle').textContent = '➕ Thêm Sinh Viên Mới';
+            document.getElementById('submitBtn').innerHTML = '➕ Thêm Sinh Viên';
+            document.getElementById('cancelBtn').style.display = 'none';
+        }
+
+        // Hủy chỉnh sửa
+        function cancelEdit() {
+            resetForm();
+        }
+
+        // Tìm kiếm
+        function handleSearch(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                displayStudents(students);
+            } else {
+                const filtered = students.filter(student => 
+                    student.name.toLowerCase().includes(searchTerm) ||
+                    student.phone.includes(searchTerm)
+                );
+                displayStudents(filtered);
+            }
+        }
+
+        // Cập nhật thống kê
+        function updateStats() {
+            document.getElementById('totalStudents').textContent = students.length;
+            const displayedCount = document.getElementById('studentTableBody').querySelectorAll('tr').length;
+            document.getElementById('displayedStudents').textContent = 
+                displayedCount > 0 && !document.getElementById('studentTableBody').querySelector('.loading') 
+                    ? displayedCount 
+                    : students.length;
+        }
+    </script>
+</body>
+</html>
